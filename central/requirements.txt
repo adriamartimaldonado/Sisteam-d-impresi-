@@ -1,0 +1,17 @@
+# --- API ---
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9      # subida del Excel (multipart/form-data)
+
+# --- Base de datos ---
+SQLAlchemy>=2.0
+psycopg2-binary>=2.9         # driver PostgreSQL (postgresql+psycopg2://)
+alembic>=1.13               # migraciones versionadas (solo hacia adelante)
+
+# --- Datos ---
+pydantic>=2.6
+openpyxl>=3.1               # lectura del Excel como TEXTO (sin que Excel mangle ceros/EAN)
+
+# --- Tests ---
+pytest>=8.0
+httpx>=0.27                 # cliente para FastAPI TestClient

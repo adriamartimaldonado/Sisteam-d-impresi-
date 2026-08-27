@@ -28,7 +28,7 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: postgresql+psycopg://etiquetas:etiquetas@localhost:5432/etiquetas_test
+      DATABASE_URL: postgresql+psycopg2://etiquetas:etiquetas@localhost:5432/etiquetas_test
 
     steps:
       - uses: actions/checkout@v4
@@ -42,6 +42,12 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f central/requirements.txt ]; then pip install -r central/requirements.txt; fi
           pip install pytest
+
+      - name: Migraciones (smoke test de Alembic)
+        working-directory: central
+        run: |
+          alembic upgrade head
+          alembic downgrade base
 
       - name: Tests
         run: pytest -q
