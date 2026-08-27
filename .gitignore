@@ -1,0 +1,38 @@
+# --- Secretos y configuracion local (§15: nunca en el repo) ---
+.env
+.env.local
+*.env
+!.env.ejemplo
+
+# --- Bases de datos locales del puesto (SQLite) ---
+*.db
+*.sqlite
+*.sqlite3
+
+# --- Datos de cliente / no publicar ---
+*.xlsx
+*.xls
+*.xlsm
+*.prn
+traza_*.txt
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# --- Editor / SO ---
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store

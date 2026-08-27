@@ -1,0 +1,47 @@
+name: CI
+
+# Tests en cada push y PR. En cuanto exista, el test clave de la fase 1
+# (tres clientes reclamando a la vez sobre un pedido de 1000, sin duplicados)
+# corre aqui: es la red de seguridad contra la etiqueta duplicada (§15).
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: etiquetas
+          POSTGRES_PASSWORD: etiquetas
+          POSTGRES_DB: etiquetas_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql+psycopg://etiquetas:etiquetas@localhost:5432/etiquetas_test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f central/requirements.txt ]; then pip install -r central/requirements.txt; fi
+          pip install pytest
+
+      - name: Tests
+        run: pytest -q
