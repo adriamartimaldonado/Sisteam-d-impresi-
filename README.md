@@ -51,6 +51,26 @@ El motor de impresión que ya funciona (envío etiqueta-a-etiqueta con confirmac
 reescribe (decisión D8). Procede del proyecto *Controlador impresoras*
 (`printer_link`, `print_controller`, `zpl_scale`, `prn_parser`).
 
+## Despliegue (un repo, sin dolor de monorepo)
+
+Es **un solo repo de Python con carpetas**, sin tooling de monorepo (nada de Nx,
+workspaces ni Bazel): `git clone` + `pytest` y ya. La ventaja de tenerlo junto es
+que el **contrato** (`comun/`) no puede desfasarse entre central y puesto.
+
+Para que un puesto **no arrastre el código del central** que no usa, no se despliega
+por `git checkout` del repo entero (afina el §15 del contexto): cada release publica
+un **artefacto del puesto** (zip/wheel de `puesto/` + `comun/`) en GitHub Releases.
+
+```
+tag v1.4.2  ──►  CI construye  puesto-v1.4.2.zip  (puesto + comun)
+puesto:  sesión cerrada → comprueba versión aprobada → descarga el zip
+         → reemplaza → reinicia el servicio → disponible otra vez
+```
+
+El central publica en `GET /v1/version_aprobada` qué versión debe correr; el puesto
+solo se actualiza **entre tiradas** (sin sesión activa), nunca a media impresión.
+Rollback = desplegar el artefacto del tag anterior.
+
 ## Plan por fases (cada una termina en algo verificable)
 
 - **Fase 0** — Base y esqueleto de API: tablas, API keys, `POST /v1/pedidos` con
