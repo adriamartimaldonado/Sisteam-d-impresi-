@@ -16,6 +16,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -103,7 +104,8 @@ class Pedido(Base):
 
 class Sesion(Base):
     __tablename__ = "sesion"
-    __table_args__ = ()
+    # Control de max_puestos: sesiones activas por pedido.
+    __table_args__ = (Index("ix_sesion_pedido_estado", "pedido_id", "estado"),)
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     pedido_id: Mapped[int] = mapped_column(ForeignKey("pedido.id"), nullable=False)
     puesto_id: Mapped[int] = mapped_column(ForeignKey("puesto.id"), nullable=False)
@@ -118,6 +120,12 @@ class Sesion(Base):
 
 class Trabajo(Base):
     __tablename__ = "trabajo"
+    __table_args__ = (
+        # La reclamacion: buscar pendientes de un pedido por orden (FOR UPDATE SKIP LOCKED).
+        Index("ix_trabajo_pedido_estado_orden", "pedido_id", "estado", "orden"),
+        # El barrido de trabajos reclamados caducados (5 min sin noticias).
+        Index("ix_trabajo_estado_reclamado", "estado", "reclamado_en"),
+    )
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     pedido_id: Mapped[int] = mapped_column(ForeignKey("pedido.id"), nullable=False)

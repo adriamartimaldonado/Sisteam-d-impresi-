@@ -1,0 +1,30 @@
+# PostgreSQL del central para DESARROLLO local.
+#
+# Usa el puerto 5433 en el host para no chocar con un Postgres que ya tengas en
+# 5432. Las credenciales salen de variables de entorno (con un valor de dev por
+# defecto): en produccion se ponen de verdad, nunca en el repo (§15).
+#
+#   docker compose up -d        # levanta la base
+#   docker compose down         # la para (los datos persisten en el volumen)
+#   docker compose down -v      # la para y BORRA los datos
+
+services:
+  db:
+    image: postgres:16
+    container_name: etiquetas-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-etiquetas}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-etiquetas}
+      POSTGRES_DB: ${POSTGRES_DB:-etiquetas}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - datos_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-etiquetas} -d ${POSTGRES_DB:-etiquetas}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  datos_pg:

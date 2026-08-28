@@ -83,15 +83,15 @@ async def crear_pedido(
     try:
         cabeceras, filas = abrir_filas(contenido, hoja)
     except ExcelInvalido as exc:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc))
+        raise HTTPException(422, str(exc))
 
     datos, errores = validar(cabeceras, filas, _campos_de_plantilla(plantilla))
     if errores:
         detalle = ErrorExcel(total_errores=len(errores),
                              errores=[e.como_dict() for e in errores])
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detalle.model_dump())
+        raise HTTPException(422, detalle.model_dump())
     if not datos:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+        raise HTTPException(422,
                             "El Excel no tiene ninguna fila de datos")
 
     # 5) Crear pedido + trabajos + evento, en una transaccion.

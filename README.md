@@ -83,11 +83,42 @@ Rollback = desplegar el artefacto del tag anterior.
 
 ## Puesta en marcha (local)
 
-Requisitos: Python 3.11+, PostgreSQL 14+.
+Requisitos: Python 3.11+ y Docker (o un PostgreSQL 14+ propio).
+
+**1. La base de datos.** Con Docker se levanta un Postgres dedicado en el puerto
+5433 (para no chocar con uno que ya tengas en 5432):
 
 ```bash
-cp .env.ejemplo .env      # y rellena los valores
-# (instrucciones de instalación y arranque se añaden con la Fase 0)
+cp .env.ejemplo .env          # el ejemplo ya apunta a localhost:5433
+docker compose up -d          # levanta el Postgres del proyecto
+```
+
+Si prefieres tu propio PostgreSQL, crea la base y el rol y ajusta `DATABASE_URL`
+en `.env`:
+
+```sql
+CREATE ROLE etiquetas LOGIN PASSWORD 'CAMBIAME';
+CREATE DATABASE etiquetas OWNER etiquetas;
+```
+
+**2. El esquema (migraciones) y datos de arranque:**
+
+```bash
+pip install -r central/requirements.txt
+cd central && alembic upgrade head      # crea las tablas del §11
+python -m central.app.seed              # sede + plantilla demo + API key de origen
+```
+
+**3. La API:**
+
+```bash
+uvicorn central.app.main:app --reload   # http://localhost:8000/docs
+```
+
+**Tests** (necesitan una BD; con Docker usa una base de test):
+
+```bash
+DATABASE_URL=postgresql+psycopg2://etiquetas:etiquetas@localhost:5433/etiquetas_test pytest -q
 ```
 
 ## Reglas que no se tocan sin discutirlo
